@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./Css/web.css">
+    <link rel="stylesheet" href="./Css/mobile.css">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+    <title>Bốc Túi Mù</title>
+</head>
+<body>
+    <h1>Bốc Túi Mù</h1>
+    <div class="container">
+        <div class="container-wrapper">
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+            <div class="pig" onclick="askQuestion(this)" onmouseenter="playRandomHoverSound(this)" onmouseleave="stopHoverSound(this)"><span class="amount"></span></div>
+        </div>
+    </div>
+    
+    <div id="questionModal" class="question-modal">
+        <div class="modal-content">
+            <h2>Câu hỏi</h2>
+            <p id="questionText"></p>
+            <div class="wrapper-qs">
+                <button onclick="checkAnswer('A')" id="optionA"></button>
+                <button onclick="checkAnswer('B')" id="optionB"></button>
+                <button onclick="checkAnswer('C')" id="optionC"></button>
+                <button onclick="checkAnswer('D')" id="optionD"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="moneyModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2>Chúc mừng!</h2>
+            <p>Bạn nhận được: <span id="modalAmount"></span></p>
+            <img id="moneyImage" class="money-image" src="" alt="Tờ tiền">
+            <button class="close-btn" onclick="closeModal()">Đóng</button>
+        </div>
+    </div>
+    
+    <audio id="successSound" src="./radio/money.m4a"></audio>
+    <audio id="failSound" src="./radio/wronganswer.m4a"></audio>
+    <audio id="backgroundMusic" src="./radio/HappyBirthday.mp3" loop autoplay></audio>
+    <!-- <audio id="hoverSound" src="./radio/hover1.m4a"></audio> -->
+    
+
+
+
+    <script>
+
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const pigContainer = document.getElementById("pigContainer");
+            const backgroundMusic = document.getElementById("backgroundMusic");
+            const hoverSound = document.getElementById("hoverSound");
+            let isQuestionOpen = false;
+
+            const numPigs = 10;
+            const radius = 120;
+
+            // Tự động phát nhạc nền khi tải trang
+            setTimeout(() => {
+                backgroundMusic.play().catch(() => console.log("Tự động phát nhạc bị chặn!"));
+            }, 1000);
+
+            for (let i = 0; i < numPigs; i++) {
+                let pig = document.createElement("div");
+                pig.classList.add("pig");
+                let angle = (i / numPigs) * (2 * Math.PI);
+                let x = radius * Math.cos(angle);
+                let y = radius * Math.sin(angle);
+                pig.style.left = `${150 + x - 50}px`;
+                pig.style.top = `${150 + y - 40}px`;
+
+                // Khi hover vào heo
+                pig.addEventListener("mouseenter", function() {
+                    if (!isQuestionOpen) {
+                        backgroundMusic.pause();
+                        hoverSound.currentTime = 0;
+                        hoverSound.play();
+                    }
+                });
+
+                pig.addEventListener("mouseleave", function() {
+                    if (!isQuestionOpen) {
+                        hoverSound.pause();
+                        hoverSound.currentTime = 0;
+                        backgroundMusic.play();
+                    }
+                });
+
+                // Khi click vào heo (chọn câu hỏi)
+                pig.addEventListener("click", function() {
+                    isQuestionOpen = true;
+                    backgroundMusic.pause();
+                    hoverSound.play();
+                    showQuestion();
+                });
+
+                pigContainer.appendChild(pig);
+            }
+
+            // Hiển thị câu hỏi (giả lập)
+            function showQuestion() {
+                setTimeout(() => {
+                    closeQuestion();
+                }, 5000);
+            }
+
+            // Đóng câu hỏi, tắt nhạc hover, bật lại nhạc nền
+            function closeQuestion() {
+                isQuestionOpen = false;
+                hoverSound.pause();
+                hoverSound.currentTime = 0;
+                backgroundMusic.play();
+            }
+        });
+
+        
+        let moneyValues = ["BABYTHREE", "Cột tóc", "100,000 VND", "Lần sau", "20,000 VND", "50,000 VND", "10,000 VND", "5,000 VND", "1 miếng mặt nạ", "SOCOLA", "ỐP LƯNG ĐIỆN THOẠI"];
+        moneyValues = moneyValues.sort(() => Math.random() - 0.5);
+
+        let currentPig = null;
+        let usedQuestions = new Set(); // Lưu câu hỏi đã được trả lời đúng
+
+        let questions = [
+            { question: "1.Ngày vk ck mình quen nhau là ngày mấy và ở đâu?", options: ["A: Đèo Hải Vân,29/12/2024", "B: Đèo Cả,29/01/2025", "C: Đèo Phước Tượng,29/01/2024", "D: Đà Nẵng,13/2/2025"], correct: "A" },
+            { question: "2.Vk thích ck ở điểm gì?", options: ["A: Đẹp zaii", "B: Khoai toaa", "C: Cả A và B đều đúng", "D: Cả A và B đều sai"], correct: "C" },
+            { question: "3.Ck thích en gì nhất?", options: ["A: Vk", "B: Socola", "C: Cơm gà", "D: Bánh nậm"], correct: "A" },
+            { question: "4.Vk có tật xấu gì?", options: ["A: Ngủ Nướng", "B: Địt thúi ", "C: A và B đều đúng", "D: A và B đều sai"], correct: "C" },
+            { question: "5.Hôm nay Ck trông thế nào trong mắt Vk?", options: ["A: Đẹp trai như mọi ngày 😎", "B: Đẹp trai hơn mọi ngày 🥰", "C: Đẹp trai vô đối luôn! 🔥", "D: Đẹp trai đến mức em muốn cưới ngay 😘"], correct: "C" },
+            { question: "6.Nếu Vk giận, Ck làm gì cho vk hết giận?", options: ["A: Thơm vk cái", "B: Ting ting mó nì", "C: Gửi tin nhắn xin lỗi + 1000 icon đáng yêu 😭", "D: Lấy con cờ him để vk bíuuuu"], correct: "A" },
+            { question: "7.Lần đầu tiên chúng ta gặp nhau, Vk đã nghĩ gì về Ck?", options: ["A: Thèn boe đoee", "B: Soái Ca", "C: Nhìn ghét ghét", "D: Định mệnh của đời mình"], correct: "A" },
+            { question: "8.Nếu Ck là một món ăn, Vk nghĩ Ck sẽ là món gì?", options: ["A: Cơm – vì không thể thiếu mỗi ngày! 🍚", "B: Trà sữa – vì uống hoài không chán! 🧋", "C: Ớt – vì lúc nào cũng làm em cay cay giận dỗi! 🌶️", "D: Kẹo – vì anh quá ngọt ngào với em! 🍬"], correct: "D" },
+            { question: "9.Ck có điểm gì mà vk thích nhất?", options: ["A: Đẹp trai và phong độ! 😎", "B: Biết quan tâm và chiều em! 💕", "C: Hài hước, lúc nào cũng làm em cười! 😆", "D: Tất cả những điều trên! 🥰"], correct: "C" },
+            { question: "10.Lần đầu tiên Ck tỏ tình, Vk đã nói gì?", options: ["A: “Ck nói thật hay giỡn đó?” 🤨", "B: “Em phải suy nghĩ đã!” 😆", "C: “Anh có chắc không đó?” 🙃", "D: Khônggggggggggggggg"], correct: "D" }
+        ];
+
+        function askQuestion(element) {
+            if (element.dataset.clicked) return;
+            currentPig = element;
+
+            let availableQuestions = questions.filter(q => !usedQuestions.has(q.question));
+            if (availableQuestions.length === 0) return; // Nếu hết câu hỏi thì không hiển thị gì cả
+            
+            let randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            let selectedQuestion = availableQuestions[randomIndex];
+            
+            document.getElementById("questionText").textContent = selectedQuestion.question;
+            document.getElementById("optionA").textContent = selectedQuestion.options[0];
+            document.getElementById("optionB").textContent = selectedQuestion.options[1];
+            document.getElementById("optionC").textContent = selectedQuestion.options[2];
+            document.getElementById("optionD").textContent = selectedQuestion.options[3];
+            document.getElementById("questionModal").dataset.correct = selectedQuestion.correct;
+            document.getElementById("questionModal").dataset.question = selectedQuestion.question;
+            document.getElementById("questionModal").style.display = "flex";
+        }
+
+
+        
+
+        function checkAnswer(answer) {
+            hoverAudio.play();
+            document.getElementById("questionModal").style.display = "none";
+            let correctAnswer = document.getElementById("questionModal").dataset.correct;
+        
+            if (answer === correctAnswer) {
+                document.getElementById("questionModal").style.display = "none";
+                stopHoverSound();
+                document.getElementById("successSound").play();
+                showAmount(currentPig);
+            } 
+            else {
+                document.getElementById("questionModal").style.display = "none";
+                stopHoverSound();
+                document.getElementById("failSound").play();
+                showPenalty();
+            }
+            backgroundMusic.play();
+        }
+        
+        // Danh sách hình phạt
+        let penalties = [
+            "Nhảy lò cò 5 vòng",
+            "Hát một bài hát ngẫu nhiên",
+            "Thơm ck 1 cái",
+            "Kể một câu chuyện cười",
+            "Nhảy múa trong 30 giây",
+            "Nói một câu bằng giọng động vật",
+            "Bạn may mắn không có hình phạt",
+            "Nói một câu tiếng Anh về bản thân",
+            "Giả giọng nhân vật hoạt hình",
+            "Ck bảo gì cũng đồng ý trong 24h"
+        ];
+        
+        // Hiển thị cửa sổ hình phạt
+        function showPenalty() {
+            backgroundMusic.pause();
+            hoverAudio.pause();
+            let randomPenalty = penalties[Math.floor(Math.random() * penalties.length)];
+            let penaltyModal = document.createElement("div");
+            penaltyModal.classList.add("modal");
+            penaltyModal.innerHTML = `
+                <div class="modal-content">
+                    <h2>Hình phạt!</h2>
+                    <p>${randomPenalty}</p>
+                    <button class="close-btn" onclick="closePenaltyModal()">OK</button>
+                </div>
+            `;
+            penaltyModal.style.display = "flex";
+            document.body.appendChild(penaltyModal);
+        }
+        
+        // Đóng cửa sổ hình phạt
+        function closePenaltyModal() {
+            document.querySelector(".modal").remove();
+        }
+        
+        
+        function showAmount(element) {
+            backgroundMusic.pause();
+            hoverAudio.pause();
+            element.dataset.clicked = true;
+            let amountDiv = element.querySelector('.amount');
+            let index = [...document.querySelectorAll('.pig')].indexOf(element);
+            let randomAmount = moneyValues[index];
+            
+            amountDiv.textContent = randomAmount;
+            amountDiv.style.display = 'block';
+            
+            let modal = document.getElementById('moneyModal');
+            let modalAmount = document.getElementById('modalAmount');
+            let moneyImage = document.getElementById('moneyImage');
+            
+            modalAmount.textContent = randomAmount;
+            moneyImage.src = `./img/${randomAmount.replace(/,/g, '').replace(' VND', '')}.png`;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('moneyModal').style.display = 'none';
+        }
+
+
+
+        // Danh sách các âm thanh khi hover
+        let hoverSounds = ["./radio/hover1.m4a"];
+        let hoverAudio = new Audio();
+        let backgroundMusic = document.getElementById("backgroundMusic");
+        let isHovering = false;
+        let isMusicPausedByHover = false; // Biến để theo dõi trạng thái của nhạc nền
+
+        function playRandomHoverSound(pig) {
+            if (!isHovering) {
+                let randomSound = hoverSounds[Math.floor(Math.random() * hoverSounds.length)];
+                hoverAudio.src = randomSound;
+                hoverAudio.loop = true;
+                backgroundMusic.play();
+                isHovering = true;
+
+                // Tắt nhạc nền khi hover vào con heo
+                if (!backgroundMusic.paused) {
+                    backgroundMusic.play();
+                    isMusicPausedByHover = true;
+                }
+            }
+        }
+
+        function stopHoverSound() {
+            backgroundMusic.play();
+            hoverAudio.currentTime = 0;
+            isHovering = false;
+
+            // Chỉ phát lại nhạc nền nếu nó bị tắt bởi hover
+            if (isMusicPausedByHover) {
+                backgroundMusic.play();
+                isMusicPausedByHover = false;
+            }
+        }
+
+        
+    </script>
+</body>
+</html>
+
